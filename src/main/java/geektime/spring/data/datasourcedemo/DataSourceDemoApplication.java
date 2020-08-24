@@ -12,6 +12,7 @@ import geektime.spring.data.datasourcedemo.service.CoffeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
+import org.omg.PortableServer.THREAD_POLICY_ID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -101,14 +102,16 @@ public class DataSourceDemoApplication implements ApplicationRunner {
         list.forEach(c -> log.info("Coffee {} ", c));
     }
 
-    public void runCache() {
+    public void runCache() throws InterruptedException {
         //get all coffee
         log.info("ALl Coffee: {}", coffeeService.findAllCoffee().size());
         for (int i = 0; i < 10; i++) {
             log.info(" find from cache .");
             coffeeService.findAllCoffee();
         }
-        coffeeService.reloadCoffee();
+        //coffeeService.reloadCoffee();
+        Thread.sleep(5_000);
+
 		log.info(" find after reload .");
 		coffeeService.findAllCoffee().forEach(c->log.info("coffee:{}",c.getName()));
     }
