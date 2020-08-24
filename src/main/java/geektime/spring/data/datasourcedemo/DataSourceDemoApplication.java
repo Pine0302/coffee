@@ -9,6 +9,7 @@ import geektime.spring.data.datasourcedemo.repository.CoffeeOrderRepository;
 import geektime.spring.data.datasourcedemo.repository.CoffeeRepository;
 import geektime.spring.data.datasourcedemo.service.CoffeeOrderService;
 import geektime.spring.data.datasourcedemo.service.CoffeeService;
+import io.lettuce.core.ReadFrom;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
@@ -18,6 +19,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -25,6 +27,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,7 +69,8 @@ public class DataSourceDemoApplication implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         //runMain();
         //runMongo();
-        runCache();
+        //runCache();
+        runRedis();
     }
 
     public void runMain() {
@@ -112,10 +117,31 @@ public class DataSourceDemoApplication implements ApplicationRunner {
         //coffeeService.reloadCoffee();
         Thread.sleep(5_000);
 
-		log.info(" find after reload .");
-		coffeeService.findAllCoffee().forEach(c->log.info("coffee:{}",c.getName()));
+        log.info(" find after reload .");
+        coffeeService.findAllCoffee().forEach(c -> log.info("coffee:{}", c.getName()));
     }
 
+    @Bean
+    public RedisTemplate<String, Coffee> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Coffee> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
+    }
+
+    @Autowired
+    public LettuceClientConfigurationBuilderCustomizer customizer(){
+        return builder -> builder.readFrom(ReadFrom.MASTER_PREFERRED);
+    }
+
+
+    public void runRedis() {
+        Optional<Coffee> coffee = coffeeService.findOneCoffee("latte");
+        log.info("find one coffee: {}", coffee);
+        for (int i = 0; i < 5; i++) {
+            coffee = coffeeService.findOneCoffee("latte");
+        }
+        log.info("value from redis: {}", coffee);
+    }
 
 }
 
