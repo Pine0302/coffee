@@ -1,6 +1,8 @@
 package geektime.spring.data.datasourcedemo;
 
+import geektime.spring.data.datasourcedemo.converter.BytesToMoneyConverter;
 import geektime.spring.data.datasourcedemo.converter.MoneyReadConverter;
+import geektime.spring.data.datasourcedemo.converter.MoneyToBytesConverter;
 import geektime.spring.data.datasourcedemo.model.Coffee;
 import geektime.spring.data.datasourcedemo.model.CoffeeOrder;
 import geektime.spring.data.datasourcedemo.model.MongoCoffee;
@@ -29,6 +31,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.convert.RedisCustomConversions;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +46,7 @@ import java.util.Optional;
 @EnableTransactionManagement
 @Slf4j
 @EnableCaching(proxyTargetClass = true)
+@EnableRedisRepositories
 public class DataSourceDemoApplication implements ApplicationRunner {
     @Autowired
     private CoffeeRepository coffeeRepository;
@@ -70,7 +75,8 @@ public class DataSourceDemoApplication implements ApplicationRunner {
         //runMain();
         //runMongo();
         //runCache();
-        runRedis();
+        //  runRedis();
+        runRedisRepository();
     }
 
     public void runMain() {
@@ -129,7 +135,7 @@ public class DataSourceDemoApplication implements ApplicationRunner {
     }
 
     @Autowired
-    public LettuceClientConfigurationBuilderCustomizer customizer(){
+    public LettuceClientConfigurationBuilderCustomizer customizer() {
         return builder -> builder.readFrom(ReadFrom.MASTER_PREFERRED);
     }
 
@@ -139,6 +145,21 @@ public class DataSourceDemoApplication implements ApplicationRunner {
         log.info("find one coffee: {}", coffee);
         for (int i = 0; i < 5; i++) {
             coffee = coffeeService.findOneCoffee("latte");
+        }
+        log.info("value from redis: {}", coffee);
+    }
+
+    @Bean
+    public RedisCustomConversions redisCustomConversions() {
+        return new RedisCustomConversions(
+                Arrays.asList(new MoneyToBytesConverter(), new BytesToMoneyConverter()));
+    }
+
+    public void runRedisRepository() {
+        Optional<Coffee> coffee = coffeeService.findSimpleCoffeeFromCache("latte");
+        log.info("find one coffee: {}", coffee);
+        for (int i = 0; i < 5; i++) {
+            coffee = coffeeService.findSimpleCoffeeFromCache("latte");
         }
         log.info("value from redis: {}", coffee);
     }

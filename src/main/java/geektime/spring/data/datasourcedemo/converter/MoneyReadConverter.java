@@ -12,6 +12,6 @@ public class MoneyReadConverter implements Converter<Document, Money> {
         Document money = (Document) source.get("money");
         double amount = Double.parseDouble(money.getString("amount"));
         String currency = ((Document) money.get("currency")).getString("code");
-        return Money.of(CurrencyUnit.of(currency),amount);
+        return Money.of(CurrencyUnit.of(currency), amount);
     }
 }
