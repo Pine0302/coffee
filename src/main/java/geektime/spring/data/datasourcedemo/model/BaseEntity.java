@@ -1,4 +1,4 @@
-package geektime.spring.data.datasourcedemo.model;;
+package geektime.spring.data.datasourcedemo.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

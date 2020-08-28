@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
@@ -35,6 +36,7 @@ import org.springframework.data.redis.core.convert.RedisCustomConversions;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -47,6 +49,7 @@ import java.util.Optional;
 @Slf4j
 @EnableCaching(proxyTargetClass = true)
 @EnableRedisRepositories
+@EnableAspectJAutoProxy
 public class DataSourceDemoApplication implements ApplicationRunner {
     @Autowired
     private CoffeeRepository coffeeRepository;
@@ -72,11 +75,11 @@ public class DataSourceDemoApplication implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
-        //runMain();
+        runMain();
         //runMongo();
         //runCache();
         //  runRedis();
-        runRedisRepository();
+       // runRedisRepository();
     }
 
     public void runMain() {
